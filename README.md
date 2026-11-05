@@ -19,25 +19,23 @@ Con Python 3.11, ejecutá estos comandos desde la raíz del repositorio en Windo
 
 Reemplazá las rutas de ejemplo por las de tu equipo.
 
-## Autorización de Meta
+## Configurar Meta Ads y Marketing API
 
-Permisos habituales:
+1. En [Meta Business Suite](https://business.facebook.com/), verificá que el usuario que generará el token tenga acceso a la cuenta publicitaria. Para crear o editar campañas, también necesita permiso para administrarla. Anotá el ID de la cuenta.
+2. En [Meta for Developers](https://developers.facebook.com/apps/), abrí **Mis apps → Crear app**. Elegí **Crear y administrar anuncios con la API de marketing** y seleccioná el portfolio comercial que corresponda. Revisá el resumen y creá una app dedicada a esta integración. [Caso de uso Marketing API](https://developers.facebook.com/docs/development/create-an-app/marketing-api-use-cases/).
+3. En el panel de la app, abrí **Casos de uso → Personalizar → Herramientas → Obtener token de acceso**. Seleccioná `ads_read` para consultas e informes. Si vas a crear o editar campañas, seleccioná también `ads_management`. Agregá `business_management` solo si vas a listar portfolios o sus activos y `pages_show_list` si necesitás consultar páginas para elegir la identidad de un anuncio.
+4. Pulsá **Obtener token** y copiá el valor. Revisá el aviso del generador antes de usarlo: puede revocar permisos previamente concedidos a esa app. Los tokens de usuario pueden caducar. Para cuentas de terceros o usuarios que no tienen un rol en la app, revisá los requisitos de acceso y revisión de Meta. [Autorización de Marketing API](https://developers.facebook.com/docs/marketing-api/overview/authorization/).
 
-- ads_read: lectura e informes.
-- ads_management: gestión publicitaria.
-- business_management: portfolios y sus activos, cuando corresponda.
-- pages_show_list: enumeración de páginas para elegir la identidad de anuncios.
+Desde la raíz del repositorio, ejecutá:
 
-Guardar un token autorizado sin escribirlo en el chat:
+```powershell
+$env:META_ADS_CONFIG_FILE = Join-Path $PWD 'private/config.json'
+.\.venv\Scripts\python.exe auth.py --profile principal
+```
 
-    $env:META_ADS_CONFIG_FILE = 'C:\Proyectos\MCP-META-ADS\private\config.json'
-    .\.venv\Scripts\python.exe auth.py --profile principal
+Pegá el token cuando lo pida la terminal. El script lo guarda en el perfil sin mostrarlo. Para usar credenciales diferentes, repetí el comando con otro nombre de perfil. Conservá el archivo fuera de Git.
 
-El comando pide el token sin eco. También acepta --token-file RUTA_PRIVADA. Usar otro --profile para añadir un token con distinto alcance.
-
-Usá una app de Meta exclusiva para esta integración. El generador rápido de Marketing API puede revocar permisos anteriores de esa app cuando se solicita un token nuevo.
-
-Las apps en desarrollo y los tokens de usuario pueden tener restricciones o caducidad. No afirmar acceso real hasta comprobar meta_ads_get_permissions y meta_ads_list_accounts.
+Una vez registrado el servidor en el agente, ejecutá `meta_ads_get_permissions` para comprobar los permisos y `meta_ads_list_accounts` para identificar la cuenta. Consultá sus campañas con `meta_ads_list_resources` usando `resource_type="campaigns"`. Para incluir el portfolio en el listado de cuentas, usá `include_business=true` con un perfil que tenga `business_management`. Si la cuenta esperada no aparece, comprobá la asignación de activos al usuario y el perfil seleccionado.
 
 ## Configuración de Codex
 
